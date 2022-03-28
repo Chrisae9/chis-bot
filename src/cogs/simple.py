@@ -24,6 +24,14 @@ SERVICES = [
     create_choice(
         name="Minecraft",
         value="minecraft-server.service"
+    ),
+    create_choice(
+        name="Project Zomboid",
+        value="pz-server.service"
+    ),
+    create_choice(
+        name="CSGO Bhop",
+        value="csgo-server.service"
     )
 ]
 
@@ -66,32 +74,53 @@ class simple(commands.Cog):
                            722937537714192464, SlashCommandPermissionType.ROLE, True)]}
                        )
     async def server_command(self, ctx, service, state):
-        # sys.stdout.buffer.write(command.stdout)
-        # sys.stderr.buffer.write(command.stderr)
-        # sys.exit(command.returncode)
         await ctx.defer()
-        command = subprocess.run(
-            ['systemctl', '--user', state, service], capture_output=True)
+        check = subprocess.run(
+            ['/bin/systemctl', 'show', '-p', 'ActiveState' ,'--value', service], capture_output=True, timeout=120)
+
+        checkout= check.stdout.decode("utf-8")
+        checkerr= check.stderr.decode("utf-8")
+        logging.info(check)
+        action = subprocess.run(
+                    ['/bin/systemctl', state, service], capture_output=True, timeout=120)
+        logging.info(action)
+
         embed = discord.Embed(
             title=f'Chis Server', description='', color=0xff00d4)
         embed.set_author(name="Chis Bot", url="https://chis.dev/chis-bot/",
                          icon_url="https://cdn.discordapp.com/app-icons/724657775652634795/22a8bc7ffce4587048cb74b41d2a7363.png?size=256")
+        embed.add_field(name=f'Service',
+                value=f'{service}', inline=False)
 
         if state == 'status':
-            if command.returncode == 3:
-                embed.add_field(name=f'{state}',
-                                value=f'{service} is stopped.', inline=False)
-            if command.returncode == 0:
-                embed.add_field(name=f'{state}',
-                                value=f'{service} is running.', inline=False)
+            embed.add_field(name=f'Command',
+                value=f'{state}', inline=True)
+            embed.add_field(name=f'Output',
+                            value=f'{checkout if checkout else "N/A"}', inline=True)
+            embed.add_field(name=f'Error',
+                            value=f'{checkerr if checkerr else "N/A"}', inline=True)
 
         if state == 'start':
-            embed.add_field(name=f'{state}',
-                            value=f'{service} is being started.', inline=False)
+            embed.add_field(name=f'Command',
+                value=f'{state}', inline=True)
+            if checkout == "deactivating":
+                embed.add_field(name=f'Action',
+                    value=f'{service} is still deactivating, hold on.', inline=True)
+            else:
+                action = subprocess.run(
+                        ['/bin/systemctl', state, service], capture_output=True, timeout=120)
+                embed.add_field(name=f'Action',
+                            value=f'{service} is starting, hold on.', inline=True)
+                embed.add_field(name=f'Previous State',
+                            value=f'{checkout if checkout else "N/A"}', inline=True)
 
         if state == 'stop':
-            embed.add_field(name=f'{state}',
-                            value=f'{service} is stopped.', inline=False)
+            embed.add_field(name=f'Command',
+                        value=f'{state}', inline=True)
+            embed.add_field(name=f'Action',
+                        value=f'{service} is stopped.', inline=True)
+            embed.add_field(name=f'Previous State',
+                        value=f'{checkout if checkout else "N/A"}', inline=True)
 
         await ctx.send(embed=embed)
 
@@ -236,7 +265,8 @@ class simple(commands.Cog):
             activity = new_member.activity
 
             if type(activity) is Spotify:
-                logging.info(f'{new_member} is listening to Spotify')
+                pass
+                # logging.info(f'{new_member} is listening to Spotify')
 
                 # if "Logic" in activity.artists:
                 #     await channel.send(f"{user} is a real hiphop fan that listens to LOGIC! 🤢")

@@ -25,7 +25,7 @@ class match(commands.Cog):
                            create_option(
                                name="spots",
                                description="Specify the number of gamers. (DEFAULT: 5)",
-                               option_type=SlashCommandOptionType.STRING,
+                               option_type=SlashCommandOptionType.INTEGER,
                                required=False,
                            ),
                            create_option(
@@ -35,7 +35,7 @@ class match(commands.Cog):
                                required=False,
                            )
                        ])
-    async def plan_command(self, ctx, spots="5", title=""):
+    async def plan_command(self, ctx, spots=5, title=""):
         """ creates a plan, takes in # of gamers, and title (optional)
         """
         # Add plan check
@@ -415,3 +415,8 @@ class match(commands.Cog):
                             value=end_selection, inline=False)
 
         return embed
+
+    @commands.command(name='event')
+    async def event_command(self, ctx: commands.Context):
+        guild = ctx.guild
+        await ctx.send(guild)
