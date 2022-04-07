@@ -1,8 +1,12 @@
-## Chis Discord Bot
+# Chis Discord Bot
 
 A Discord bot that provides users with a simple interface to plan pick up Valorant games.
 
 *More information at [chis-bot](https://chis.dev/chis-bot).*
+
+# WARNING: This repository is no longer maintained
+
+**New updates for Chis Bot can be found at https://github.com/Chrisae9/chis-botjs**
 
 ### Setup
 
